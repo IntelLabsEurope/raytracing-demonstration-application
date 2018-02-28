@@ -33,7 +33,7 @@ This demo application has been implemented and packaged into two docker containe
 	# Change directory to the landscaper root.
 	cd raytracing-demonstration-application
 	
-### Building the docker containers
+### Building docker containers
 
     # Build ray tracing engine backend container
 	cd raytracing_engine
