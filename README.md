@@ -3,10 +3,10 @@
 1. [Introduction](#introduction)
 2. [Installation](#installation)
 	* [Retrieve the code](#retrieve-the-code)
-	* [Building docker containers](#Building-docker-containers)
-3. [Environment](#Environment)
-   	* [CPU Deployment ](#CPU-Deployment)
-   	* [MIC Co-processor Deployment](#MIC-Co-processor-Deployment)   	
+	* [Building docker containers](#building-docker-containers)
+3. [Environment](#environment)
+   	* [CPU Deployment ](#cpu-deployment)
+   	* [MIC Co-processor Deployment](#mic-co-processor-deployment)   	
 4. [Deploying the Application without Mesos](#Deploying-the-Application-without-Mesos)
 	* [Start Ray Tracing Engine Container](#Start-Ray-Tracing-Engine-Container)
 	* [Start Ray Tracing WebService Container](#Start-Ray-Tracing-WebService-Container)
@@ -56,11 +56,11 @@ Install Docker version 1.10.x or above, follow the installation guide:
 For interactive real time rendering client system need X11 display capability with SSH tunneling.
  
 ### MIC Co-processor Deployment:
-	For Mesos/Marathon deployment follow the guide to setup mesos cluster from : https://mesosphere.github.io/marathon/docs/
+For Mesos/Marathon deployment follow the guide to setup mesos cluster from : https://mesosphere.github.io/marathon/docs/
 
-	To execute ray tracing demo using Xeon Phi (MIC co-processor) follow the hardware installation and configuration guide. 
+To execute ray tracing demo using Xeon Phi (MIC co-processor) follow the hardware installation and configuration guide. 
 
-	Container rtdemo/raytracing_engine:1 includes required libraries to run the application assuming MIC co-processors are fully operation in the host machine. 
+Container rtdemo/raytracing_engine:1 includes required libraries to run the application assuming MIC co-processors are fully operation in the host machine. 
 
 ## Deploying the Application without Mesos
 
