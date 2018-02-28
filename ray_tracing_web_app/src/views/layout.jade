@@ -1,0 +1,93 @@
+<!--
+ Copyright (c) 2017, Intel Research and Development Ireland Ltd.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+ 
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+        script(src="/javascripts/jquery.js")
+        script(src='/javascripts/bootstrap.min.js')
+        script(src="/javascripts/notify.min.js")
+        script(src="/javascripts/spin.min.js")
+
+        script.
+            var getQueryString = function ()
+            {
+                var vars = [], hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for(var i = 0; i < hashes.length; i++)
+                {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+                return vars;
+            }
+            var spin_opts = {
+                lines: 11,
+                length: 0,
+                width: 23,
+                radius: 35,
+                scale: 1,
+                corners: 1,
+                color: '#000',
+                opacity: 0.25,
+                rotate: 0,
+                direction: 1,
+                speed: 1,
+                trail: 60,
+                fps: 20,
+                zIndex: 2e9,
+                className: 'spinner',
+                top: '50%',
+                left: '50%',
+                shadow: true,
+                hwaccel: false,
+                position: 'absolute'
+            }
+            
+        block scripts
+
+    body
+        nav.navbar.navbar-default.navbar-fixed-top.cloudgradient
+            img(src="/images/cloudlightning_logo.png")
+            img.intel_logo(src="/images/intel_logo.png")
+            div.container-fluid
+                div.navbar-header
+                    button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false")
+                        span.sr-only Toggle navigation
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    a.navbar-brand(href="#")  Ray Tracing Service
+
+                div#bs-example-navbar-collapse-1.navbar-collapse.collapse.cwtabholder(aria-expanded="false" style="height: 1px;")
+                    ul.nav.navbar-nav
+                        li.cwtab.cwtablist
+                            a(href="/") Manage Jobs
+                                span(class="sr-only current")
+                        li.cwtab.cwtablist
+                            a(href="/status") Status
+                                span(class="sr-only current")
+                            
+
+
+    block content
+
+
+

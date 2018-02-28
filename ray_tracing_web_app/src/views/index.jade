@@ -1,0 +1,230 @@
+<!--
+ Copyright (c) 2017, Intel Research and Development Ireland Ltd.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ -->
+ 
+extends layout
+
+block scripts
+    script.
+        var debug_tick = false;
+        $(document).ready(function(){
+            $('#input_jobname').blur(function(event){
+                $(event.target).removeClass('input_error')
+            });
+            $('#myModal').hide();
+            $('#btn_create').on('click', function (){
+                showModal(mode='create');
+            });
+            $('#btn_open').on('click', function (){
+                showModal(mode='open');
+            });
+            $('#input_upload_confirm').on('click', function (){
+                if (validateData()){
+                    processForm();
+                }
+                else{
+                    $('#input_jobname').addClass('input_error')
+                    $.notify('Please enter a job name', 'warn')
+                }
+            });
+
+            $('input[type=radio][name=optfile]').change(function() {
+                if (this.value == '0') {
+                    $('#input_browse').attr('disabled', false);
+                    $('#input_url').attr('disabled', true).val('');
+                }
+                else{
+                    $('#input_browse').attr('disabled', true);
+                    $('#input_url').attr('disabled', false).focus();
+                }
+            });
+
+            var showModal = function(mode) {
+                $('.modal-title').html(mode=='create'? 'Create New Job' : 'Edit Existing Job')
+                if (mode=='create'){
+                    $('#input_upload_confirm').show()
+                }
+                else{
+                    $('#input_upload_confirm').hide()    
+                }
+                
+                $('#job_create, #job_open').hide();
+                $('#job_' + mode).show()
+                $('#myModal').modal('show')
+            }
+
+            var processForm = function(){
+                var target = $('#myModal')[0]
+                var spinner = new Spinner(spin_opts).spin(target);
+
+                var data = {};
+                data.name = $('#input_jobname').val();
+                data.job_type = $('#mode_select input:radio:checked').val() == '0'? 'Interactive' : 'Batch Job'
+                data.ambient_light = $('#input_opta').val();
+                data.frame_size = $('#input_optb').val();
+                data.camera_pos = $('#input_optc').val();
+                data.camera_look = $('#input_optd').val();
+                data.log = [{
+                    'time': new Date().toISOString(),
+                    'message': 'Job submitted'
+                }];
+
+
+                var mode = $('#file_select input:radio:checked').val() == '0'? 'file' : 'url'
+                var file_path;
+
+                if (mode == 'file'){
+                    //do file
+                    //get back file path
+                    var formData = new FormData();
+                    formData.append('file-0', $('#input_browse')[0].files[0]);
+                    formData.append('json', JSON.stringify(data));
+                    $.ajax({
+                        url : '/file/upload/',
+                        type: 'POST',
+                        data: formData,
+                        success: function (msg) {
+                           console.log(msg);
+                        },
+                        contentType: false,
+                        processData: false
+                    }).done(function(result){
+                        spinner.stop()
+                        if ('success' in result){
+                            $('#myModal').modal('hide')
+                            $.notify('Job created', 'success')
+                        }
+                        else if ('error' in result){
+                            $.notify('Error creating job: ' + result.error, 'error')
+                        }
+                        else{
+                            $.notify('General error in response from server!', 'error')
+                        }
+                    });
+                }
+                else{
+                    //do url method
+                    //get back downloaded file path
+                }
+
+            }
+
+            var validateData = function(data){
+                return ($('#input_jobname').val().length > 0)
+            }
+
+        });
+
+
+block content
+    div
+        h4.
+            Ray Tracing Engine (Embree Kernels):
+        //div#tenants
+        //    select(id="tenant_select", name="n_tenant_select", style="color: black;")
+        //        for item in tenants
+        //            option(selected='admin' == item, style="color: black;") #{item}
+
+        hr
+        div
+            p #{embree_url}
+
+        div#main_page_body
+
+            h4.
+                Ray Tracing and 3d Image Rendering Portal
+            p
+                Powered by Cloudlightning
+
+
+            h5.
+                Select your Rendering Job Option
+
+            input#btn_create.config-box.btn.btn-info(type='button' value='Create New' data-toggle="tooltip" title="Configure and submit a new rendering job")
+            | 
+            input#btn_open.config-box.btn.btn-info(type='button' value='Edit Existing' data-toggle="tooltip" title="Edit properties of an existing rendering job")
+
+
+    div#myModal.modal.fade
+        div.modal-dialog
+            div.modal-content
+                div.modal-header
+                    button.close(type="button" data-dismiss="modal" aria-hidden="true") &times; 
+                    h4.modal-title modal-title
+                div.modal-body
+                    div#job_create
+                        h5.
+                            Job Name
+                        p
+                        input#input_jobname.config-box(type='text' placeholder='Job Name' data-toggle="tooltip" title="Job name")
+                        hr    
+                        h5.
+                            Model File
+                        p
+                            | Upload your model file or specify a web embree_url
+
+                        div#file_select
+                            label
+                                input.f_select(type="radio" name="optfile" value="0" checked="true")
+                                input#input_browse.config-box.f_select(type='file' placeholder='Browse to local file system' data-toggle="tooltip" title="Browse to local file system")
+                                //input#input_browse.config-box(type='button' value='Browse')
+                            br
+                            label
+                                input.f_select(type="radio" name="optfile" value="1")
+                                input#input_url.config-box.f_select(type='text' placeholder="Enter web URL of your model file" data-toggle="tooltip" title="Enter web URL of your model file" disabled="true")
+                        hr
+
+                        h5.
+                            Ray Tracing Mode
+                        p
+                        div.radio#mode_select
+                            label
+                                input(type="radio" name="optradio" value="0" checked="true")
+                                | Interactive real time rendering (requires X11 server)
+                            br
+                            label
+                                input(type="radio" name="optradio" value="1")
+                                | Batch / Offline rendering (file output)
+                        hr
+                        
+                        h5.
+                            Ray Tracing Parameters
+                        p
+                        div
+                            p.rt_params
+                                Ambient Light (RGB, default: 1,1,1)
+                                input#input_opta(type='text', value='1,1,1', placeholder='r,g,b')
+                            p.rt_params
+                                Frame Size (Width x Height, default 768x512 )
+                                input#input_optb(type='text', value='768x512', placeholder='WxH')
+                            p.rt_params
+                                Initial Camera Position (x,y,z co-ordinates)
+                                input#input_optc(type='text', value='1,1,1', placeholder='x,y,z')
+                            p.rt_params
+                                Camera Target Position (x,y,z co-ordinates)
+                                input#input_optd(type='text', value='0,0,0', placeholder='x,y,z')
+
+                        //hr
+                        //input#input_upload_reset.config-box(type='button' value='Reset' data-toggle="tooltip" title="Reset this form")
+                        //input#input_upload_confirm.config-box(type='button' value='Upload' data-toggle="tooltip" title="Upload a file")
+
+                    div#job_open
+                        p
+                            | No jobs currently running.
+
+
+                div.modal-footer
+                    button.btn.btn-info#input_upload_confirm(type='button') Upload
+                    button.btn.btn-info(type="button" data-dismiss="modal") Cancel 

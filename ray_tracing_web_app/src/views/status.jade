@@ -1,0 +1,388 @@
+<!--
+ 
+ Copyright (c) 2017, Intel Research and Development Ireland Ltd.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+ -->
+
+extends layout
+
+block scripts
+    script.
+        var debug_tick = false;
+        var compression_command = 'ssh -XC -c blowfish-cbc,arcfour';
+        var copyToClipboard = function(elem) {
+
+            var targetId = "copy_text";
+            $('#copy_text').val($('#details_command').text());
+            var isInput = elem.tagName === "INPUT" || elem.tagName === "TEXTAREA";
+            var origSelectionStart, origSelectionEnd;
+            if (isInput) {
+                target = elem;
+                origSelectionStart = elem.selectionStart;
+                origSelectionEnd = elem.selectionEnd;
+            } else {
+                // must use a temporary form element for the selection and copy
+                target = document.getElementById(targetId);
+                if (!target) {
+                    var target = document.createElement("textarea");
+                    target.style.position = "absolute";
+                    target.style.left = "-9999px";
+                    target.style.top = "0";
+                    target.id = targetId;
+                    document.body.appendChild(target);
+                }
+                target.textContent = elem.textContent;
+            }
+            var currentFocus = document.activeElement;
+            target.focus();
+            target.setSelectionRange(0, target.value.length);
+            
+            var succeed;
+            try {
+                  succeed = document.execCommand("copy");
+            } catch(e) {
+                succeed = false;
+            }
+            // restore original focus
+            if (currentFocus && typeof currentFocus.focus === "function") {
+                currentFocus.focus();
+            }
+            
+            if (isInput) {
+                // restore prior selection
+                elem.setSelectionRange(origSelectionStart, origSelectionEnd);
+            } else {
+                // clear temporary content
+                target.textContent = "";
+            }
+            return succeed;
+        }
+
+
+        var job_details = {};
+        var visible_job = null;
+
+        var updateJobDetails = function(j){
+            if(j.job_type == 'Batch Job' && j.status != 'complete'){
+                $.ajax({
+                    url : '/jobstatus/',
+                    type: 'POST',
+                    data: JSON.stringify({ 'id': j.id }),
+                    success: function (msg) {
+                       
+                    },
+                    contentType: "application/json"
+                }).done(function(result){
+                    if ('status' in result){
+                        j.status = result.status
+                    }
+                    else{
+                        j.status = 'please wait...'
+                    }
+                });
+            }
+        }
+
+        var renderDetails = function(job, is_update){
+            $('#generate_preview').off('click').on('click', function(){
+                $.ajax({
+                    url : '/generatepreview/',
+                    type: 'POST',
+                    data: JSON.stringify({ 'id': job.id }),
+                    contentType: "application/json"
+                }).done(function(result){
+                    console.log(result)
+                    if ('success' in result && 'imageid' in result){
+                        job['preview_image'] = result.imageid;
+                        $('#preview_image')[0].src = 'data/' + String(result.imageid)
+                    }
+                    else{
+                        $.notify("Problem generating preview: ")
+                    }
+                });
+            });
+
+            $('#download, #mpeg').prop('disabled', true);
+            $('#download').off('click').on('click', function(){
+                $.ajax({
+                    url : '/download/',
+                    type: 'POST',
+                    data: JSON.stringify({ 'id': job.id }),
+                    contentType: "application/json"
+                }).done(function(result){
+                    if ('success' in result){
+                        window.location=result.filename;
+                        $.notify("Downloading: " + result.filename, 'success')
+                    }
+                    else{
+                        $.notify("Problem downloading file: " + result.filename, 'error')   
+                    }
+                });
+
+            })
+            $('#mpeg').off('click').on('click', function(){
+                $.notify('Generating MPEG video, please wait', 'info')
+                $.ajax({
+                    url : '/generatempeg/',
+                    type: 'POST',
+                    data: JSON.stringify({ 'id': job.id }),
+                    contentType: "application/json"
+                }).done(function(result){
+                    if ('success' in result){
+                        window.location=result.filename;
+                        $.notify("Downloading MPEG: " + result.filename, 'success')
+                    }
+                    else{
+                        $.notify("Problem creating MPEG file: " + result.filename, 'error')   
+                    }
+                });
+
+            })
+
+            $('#delete_job').off('click').on('click', function(){
+                var conf = confirm("Are you sure you want to delete?");
+                if (conf == true) {
+                    $.ajax({
+                        url : '/delete/',
+                        type: 'POST',
+                        data: JSON.stringify({ 'id': job.id }),
+                        contentType: "application/json"
+                    }).done(function(result){
+                        if ('success' in result){
+                            var select = $('#job_select')[0]
+                            var redirect = select.length == 1;
+                            for (i=0;i<select.length;  i++) {
+                                if (select.options[i].value==result.id) {
+                                    if (redirect){
+                                        //we deleted the last job, go to main page
+                                        window.location = '/';
+                                    }
+                                    else{
+                                        select.remove(i);
+                                        $('#job_select').change()    
+                                    }
+                                }
+                            }
+                            $.notify('Job Deleted\nID: ' + result.id, 'success')
+                        }
+                        else{
+                            $.notify('Error: Job deletion failed!', 'warn')
+                        }
+                    });
+                } else {
+                    $.notify('Delete cancelled', 'info')
+                }
+            })
+            for(var key in job){
+                if (key != 'log'){
+                    if (key == 'status'){
+                        //TODO: check if we should show status
+                        if (job[key] == 'complete'){
+                            $('#download, #mpeg').prop('disabled', false);
+                        }
+                        $('#details_' + key).html(job[key])
+                    }
+                    if (!is_update){
+                        if (job['preview_image'] === undefined){
+                            $('#preview_image')[0].src = 'images/no_preview.png'
+                        }
+                        else{
+                            $('#preview_image')[0].src = 'data/' + job['preview_image']
+                        }
+                        $('#details_' + key).html(job[key])
+                    }
+                }
+            }
+            
+            var log_string = '';
+            for(var i in job.log){
+                log_string += '<div class="log_row"><div class="log_time">' + job.log[i].time + '</div><div class="log_message">' + job.log[i].message + '</div></div>';
+            }
+            $('#details_log').html(log_string);
+        }
+
+        var validateData = function(data){
+            return true;
+        }
+
+        $(document).ready(function(){
+            document.getElementById("copy_button").addEventListener("click", function() {
+                copyToClipboard(document.getElementById("details_command"));
+            });
+
+            job_details = !{JSON.stringify(jobs)};
+            if (job_details.length == 0){
+
+            }
+            else{
+                setInterval(function(){
+                    updateJobDetails(visible_job);
+                    renderDetails(visible_job, true)
+                }, 2000);
+
+                $('#job_select').on('change', function(e) {
+                    var job_id = e.target.options[e.target.selectedIndex].value;
+                    job = $.grep(job_details, function(e){ return e.id == job_id; })[0];
+                    renderDetails(job, false)
+                    visible_job = job;
+                });
+                
+                $('#input_toggle_compression').on('click', function(){
+                    var current_command = $('#details_command').text();
+                    if(current_command.split(' ').join('').indexOf('ssh-Xroot') >= 0){
+                        $('#details_command').text(
+                                current_command.replace('ssh -X', compression_command)
+                        );
+                        $('#input_toggle_compression').addClass('btn-success');
+                        $('#input_toggle_compression').removeClass('btn-warning');
+                    }
+                    else{
+                        $('#details_command').text(
+                                current_command.replace(compression_command, 'ssh -X')
+                        );
+                        $('#input_toggle_compression').addClass('btn-warning')
+                        $('#input_toggle_compression').removeClass('btn-success')
+                    }
+                });
+
+                $('#myModal').hide();
+                $('#btn_create').on('click', function (){
+                    showModal(mode='create');
+                });
+                $('#btn_open').on('click', function (){
+                    showModal(mode='open');
+                });
+
+
+                $('#get_command').on('click', function(){
+                    $('#myModal').modal('show')
+                });
+
+                $('#job_select').change()
+            }
+
+            
+
+            
+            
+        });
+
+
+block content
+    div
+        h4.
+            Ray Tracing Job Status
+        hr
+        h5.
+            Job List
+        
+        div#status_page_body
+
+            if jobs.length > 0
+            
+                div#job_dropdown
+                    select(id="job_select", name="n_job_select", style="color: black;")
+                        for job in jobs
+                            option(style="color: black;", value="#{job.id}") #{job.name}
+                
+                div#job_details
+                    p
+                        div.job_row
+                            div.job_col_left
+                                | Name
+                            div.job_col_right
+                                div#details_name
+                        div.job_row
+                            div.job_col_left
+                                | ID
+                            div.job_col_right
+                                div#details_id
+                        div.job_row
+                            div.job_col_left
+                                | Render Type
+                            div.job_col_right
+                                div#details_job_type
+                        div.job_row
+                            div.job_col_left
+                                | Start Time
+                            div.job_col_right
+                                div#details_start_time
+                        div.job_row
+                            div.job_col_left
+                                | Camera Position
+                            div.job_col_right
+                                div#details_camera_pos
+                        div.job_row
+                            div.job_col_left
+                                | Camera Target
+                            div.job_col_right
+                                div#details_camera_look
+                        div.job_row
+                            div.job_col_left
+                                | Ambient Light
+                            div.job_col_right
+                                div#details_ambient_light
+                        div.job_row
+                            div.job_col_left
+                                | Frame Size
+                            div.job_col_right
+                                div#details_frame_size
+                        div.job_row
+                            div.job_col_left
+                                | Status
+                            div.job_col_right
+                                div#details_status
+                        br
+                        hr
+                        div.button-box
+                            button#get_command.btn.btn-info(type="button") View job command 
+                            |  
+                            button#download.btn.btn-info.btn-disabled(type="button" disabled="disabled") Download Output 
+                            |  
+                            button#mpeg.btn.btn-info.btn-disabled(type="button" disabled="disabled") Create MPEG 
+                            |  
+                            button#delete_job.btn.btn-danger(type="button") Delete Job 
+
+                        hr
+                        div.job_row
+                            div.job_col_span.align_cen
+                                div#preview_div
+                                button#generate_preview.btn.btn-info(type="button") Generate / Update Preview
+                                br
+                                img#preview_image(src='images/no_preview.png')
+                                
+                        div.job_row
+                            div.job_col_right
+                                | LOG
+                                div#details_log
+            else
+                div#no_jobs_notice
+                    p
+                        | No jobs found!
+                    a(href="/")  Click here to create some jobs.
+
+    div#myModal.modal.fade
+        div.modal-dialog
+            div.modal-content
+                div.modal-header
+                    button.close(type="button" data-dismiss="modal" aria-hidden="true") &times; 
+                    h4.modal-title Launch Command
+                div.modal-body
+                    input#copy_text(type="TEXTAREA" style="position:absolute;left: -1000px; top: -100px")
+                    div#details_command
+                div.modal-footer
+                    button.btn.btn-warning#input_toggle_compression(type='button') Use Compression
+                    button.btn.btn-info#copy_button(type='button') Copy to Clipboard
+                    button.btn.btn-info(type="button" data-dismiss="modal") Close 

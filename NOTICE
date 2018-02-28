@@ -1,0 +1,32 @@
+Copyright (c) 2018, Intel Research and Development Ireland Ltd.
+
+This project includes software developed by Intel Labs Europe.
+http://www.intel.com/
+
+Licensed under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License. You may obtain a copy of the License at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied. See the License for the
+specific language governing permissions and limitations
+under the License.
+
+This project includes dependencies on:
+	web.py, Public Domain   
+	web.py wsgiserver, BSD 3-clause "New" or "Revised" License   
+	bootstrap, MIT License   
+	jade, MIT License   
+	jQuery, MIT License   
+	embree-renderer, Apache License 2.0   
+	Express.js, MIT License   
+	Nodejs Unspecified, MIT License 
+	paramiko, GNU Lesser General Public License v2.1 or later   
+	mongo-python-driver, Apache License 2.0   
+	Python Imaging Library (PIL), Histp Like License   
+	spin.js, MIT License
+	jq - command-line JSON processor, MIT License
