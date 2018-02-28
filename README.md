@@ -7,14 +7,14 @@
 3. [Environment](#environment)
    	* [CPU Deployment ](#cpu-deployment)
    	* [MIC Co-processor Deployment](#mic-co-processor-deployment)   	
-4. [Deploying the Application without Mesos](#Deploying-the-Application-without-Mesos)
-	* [Start Ray Tracing Engine Container](#Start-Ray-Tracing-Engine-Container)
-	* [Start Ray Tracing WebService Container](#Start-Ray-Tracing-WebService-Container)
-	* [Link the containers](#Link-the-containers)
-	* [Running the demo](#Running-the-demo)
+4. [Deploying the Application without Mesos](#deploying-the-application-without-mesos)
+	* [Start Ray Tracing Engine Container](#start-ray-tracing-engine-container)
+	* [Start Ray Tracing WebService Container](#start-ray-tracing-webService-container)
+	* [Linking the Containers](#linking-the-containers)
+	* [Running the demo](#running-the-demo)
 	* [Deploying the Application with Mesos](#deploying-the-application-with-mesos)
 5. [About Ray Tracing Demonstrator Application](#about-ray-tracing-demonstrator-application)
-6. [Acknowledgements](#Acknowledgements)
+6. [Acknowledgements](#acknowledgements)
 
 ## Introduction
 
@@ -72,7 +72,7 @@ Container rtdemo/raytracing_engine:1 includes required libraries to run the appl
 
 	docker run --name webserver -p 3005:3005 -p 9393:9393  rtdemo/raytracing_webserver:1
 	
-### Link the containers
+### Linking the containers
 
 	curl -i -H "Content-Type: application/json" -X POST -d '{"url":"<host-ip:2222>"}' http://host-ip:9393/
 
