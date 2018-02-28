@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-#
 # Copyright (c) 2017, Intel Research and Development Ireland Ltd.
 
 # Licensed under the Apache License, Version 2.0 (the "License");
