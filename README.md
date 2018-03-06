@@ -20,7 +20,7 @@
 
 Ray Tracing Demonstration Application is a Python implementation of web-based Ray Traced 3D image rendering application deployed using Docker containers. This demo application is designed to discover and utilize the Intel Xeon CPUs or Xeon Phi coprocessors exposed by Infrastructure manager i.e. Apache Mesos and execute Intel’s Embree Ray Tracing Kernels in order to render 3D images of Ray Tracing models uploaded by users. 
 
-Application users can perform both batch and interactive rendering by submitting the jobs through web UI and download the fully rendered images or visualize the real-time rendered images through SSH X11 display forwarding onto their local workstation screenThe landscaper constructs a graph describing a computing infrastructure. The graph details what software stacks are running on what virtual infrastructure, and on what physical infrastructure the virtual infrastructure is running.
+Application users can perform both batch and interactive rendering by submitting the jobs through web UI and download the fully rendered images or visualize the real-time rendered images through SSH X11 display forwarding onto their local workstation screen.
 
 This demo application has been implemented and packaged into two docker containers to manage the dependencies and provide lightweight portability for cloud deployment. 
 
@@ -91,9 +91,6 @@ The Ray Tracing Demonstrator Application was developed by Intel Labs Europe and 
 
 Contributions from the community are welcome via Pull Requests.
 
-## Acknowledgements 
+## Acknowledgments 
 This is Open Source software released under the Apache 2.0 License. Please see the LICENSE file for full license details.
-Authors: Perumal Kuppuudaiyar,
-		 Leonard Feehan,
-		 Surya Narayanan 
 This software has been contributed by CloudLightning, a Horizon 2020 project co-funded by the European Union. https://www.cloudlightning.eu/
