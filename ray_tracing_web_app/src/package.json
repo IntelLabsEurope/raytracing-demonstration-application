@@ -14,7 +14,7 @@
     "jade": "~1.11.0",
     "kerberos": "~0.0.21",
     "mongodb": "~2.0.55",
-    "mongoose": "~4.8.4",
+    "mongoose": "~5.7.5",
     "monk": "git+https://github.com/vccabral/monk.git",
     "morgan": "~1.7.0",
     "node-uuid": "~1.4.7",
