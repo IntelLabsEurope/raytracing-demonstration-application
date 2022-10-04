@@ -13,7 +13,7 @@
     "express-formidable": "0.1.3",
     "jade": "~1.11.0",
     "kerberos": "1.0.0",
-    "mongodb": "~2.0.55",
+    "mongodb": ">=3.1.13",
     "mongoose": "~5.7.5",
     "monk": "git+https://github.com/vccabral/monk.git",
     "morgan": "~1.7.0",
